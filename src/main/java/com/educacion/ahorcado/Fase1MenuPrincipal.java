@@ -19,11 +19,11 @@ public class Fase1MenuPrincipal {
                 case 1: {
                     EstadoPartida estado = Fase2RegistroJugador.crearEstadoInicial(scanner);
                     Fase3BucleJuego.ejecutar(scanner, estado);
-                    System.out.printf("%n[Fase 4] El resumen de la partida se implementa en la siguiente fase.%n");
+                    Fase4Resumen.finalizarPartida(estado);
                     break;
                 }
                 case 2:
-                    System.out.printf("%n[Fase 4] Las estadísticas se implementan en una fase posterior.%n");
+                    Fase4Resumen.mostrarEstadisticas();
                     break;
                 case 3:
                     System.out.printf("%n¡Gracias por jugar! Hasta pronto.%n");
