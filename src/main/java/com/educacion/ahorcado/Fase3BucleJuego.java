@@ -14,12 +14,20 @@ public class Fase3BucleJuego {
     private static final double PENALIZACION_POR_FALLO = 5.0;
 
     public static void ejecutar(Scanner scanner, EstadoPartida estado) {
+        boolean pistaMostrada = false;
         System.out.printf("Escribe una letra por turno, o %s para abandonar la partida.%n", PALABRA_RENDICION);
 
         while (estado.intentosRestantes > 0 && !estado.juegoGanado) {
             System.out.printf("%nPalabra: %s%n", estado.mascara);
             System.out.printf("Letras usadas: %s%n", estado.historial.length() == 0 ? "-" : estado.historial);
             System.out.printf("Intentos restantes: %d / %d%n", estado.intentosRestantes, estado.MAX_INTENTOS);
+
+            // Reto 1: pista con substring() cuando queda un único intento
+            if (estado.intentosRestantes == 1 && !pistaMostrada) {
+                System.out.printf("PISTA: la palabra contiene la letra %s.%n",
+                        Fase5Retos.generarPista(estado.mascara, estado.palabraSecreta));
+                pistaMostrada = true;
+            }
             System.out.printf("Ingrese una letra: ");
             String entrada = Fase1MenuPrincipal.leerLinea(scanner).trim();
 
@@ -85,5 +93,10 @@ public class Fase3BucleJuego {
         }
 
         System.out.printf("%nPalabra: %s%n", estado.mascara);
+
+        // Reto 3: multiplicador por velocidad (turnos) y por fallos (intentos que sobraron)
+        if (estado.juegoGanado) {
+            estado.puntaje += Fase5Retos.calcularBonoVictoria(estado.intentosRestantes, estado.turnos());
+        }
     }
 }

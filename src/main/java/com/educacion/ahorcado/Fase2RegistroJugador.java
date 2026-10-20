@@ -18,7 +18,7 @@ public class Fase2RegistroJugador {
     public static EstadoPartida crearEstadoInicial(Scanner scanner) {
         String nombreJugador = leerNombre(scanner);
         String palabraSecreta = elegirPalabraSecreta();
-        final int maxIntentos = 6;
+        int maxIntentos = Fase5Retos.calcularMaxIntentos(palabraSecreta.length());  // Reto 2
         EstadoPartida estado = new EstadoPartida(nombreJugador, palabraSecreta, maxIntentos, PUNTAJE_INICIAL);
         mostrarBienvenida(estado);
         return estado;
