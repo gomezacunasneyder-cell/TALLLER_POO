@@ -16,9 +16,11 @@ public class Fase1MenuPrincipal {
             opcion = leerOpcionMenu(scanner);
 
             switch (opcion) {
-                case 1:
-                    System.out.printf("%n[Fase 2] El juego se implementa en la siguiente fase.%n");
+                case 1: {
+                    EstadoPartida estado = Fase2RegistroJugador.crearEstadoInicial(scanner);
+                    System.out.printf("%n[Fase 3] El bucle del juego se implementa en la siguiente fase.%n");
                     break;
+                }
                 case 2:
                     System.out.printf("%n[Fase 4] Las estadísticas se implementan en una fase posterior.%n");
                     break;
