@@ -3,8 +3,10 @@ package co.edu.puj.rpg.modelo.enemigo;
 import co.edu.puj.rpg.modelo.Personaje;
 
 /**
- * Enemigo de la arena. Replica la estructura encapsulada de Personaje,
- * pero vive en un subpaquete distinto (modelo.enemigo).
+ * Enemigo de la arena. Replica la estructura de atributos privados de Personaje y vive en un
+ * subpaquete distinto (co.edu.puj.rpg.modelo.enemigo) para verificar el aislamiento de acceso
+ * frente a Main (co.edu.puj.rpg.principal): los miembros private y los de acceso por defecto
+ * (package-private) no son visibles desde otro paquete.
  */
 public class Enemigo {
 
@@ -25,8 +27,7 @@ public class Enemigo {
         this.nivel = nivel >= 1 ? nivel : 1;
         this.oro = oro >= 0.0 ? oro : 0.0;
         this.experienciaRecompensa = experienciaRecompensa >= 0 ? experienciaRecompensa : 0;
-        this.estaVivo = true;
-        setPuntosVida(this.vidaMaxima);
+        setPuntosVida(this.vidaMaxima);   // el setter fija puntosVida y estaVivo: sin asignaciones directas
     }
 
     // ---------- Comportamiento ----------
@@ -39,20 +40,28 @@ public class Enemigo {
     }
 
     public void recibirDano(int cantidadDano) {
-        if (cantidadDano <= 0) {
+        if (!esDanoValido(cantidadDano)) {
             return;
         }
         setPuntosVida(puntosVida - cantidadDano);
     }
 
+    /**
+     * Sin modificador de acceso (package-private): solo las clases de este paquete pueden invocarlo.
+     * Main, ubicada en otro paquete, no lo ve.
+     */
+    boolean esDanoValido(int cantidadDano) {
+        return cantidadDano > 0;
+    }
+
     // ---------- Setter validado ----------
 
-    public void setPuntosVida(int vida) {
+    public final void setPuntosVida(int vida) {
         if (vida <= 0) {
             this.puntosVida = 0;
             this.estaVivo = false;
-        } else if (vida > vidaMaxima) {
-            this.puntosVida = vidaMaxima;
+        } else if (vida > this.vidaMaxima) {
+            this.puntosVida = this.vidaMaxima;
             this.estaVivo = true;
         } else {
             this.puntosVida = vida;

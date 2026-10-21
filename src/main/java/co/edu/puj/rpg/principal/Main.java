@@ -8,8 +8,8 @@ import java.util.Scanner;
 
 /**
  * Simulador de Batalla / Arena de Héroes.
- * Main solo usa la API pública (getters, setters y métodos de comportamiento):
- * no puede tocar ningún atributo privado de Personaje ni de Enemigo.
+ * Main solo usa la API pública (getters, setters y métodos de comportamiento): no puede tocar
+ * ningún atributo privado de Personaje ni de Enemigo, ni miembros de acceso por defecto o protegidos.
  */
 public class Main {
 
@@ -27,6 +27,7 @@ public class Main {
                 new Enemigo("Dragón", 120, 16, 3, 150.0, 150)
         };
 
+        // Historial de batalla: un único StringBuilder que acumula cada evento del combate
         StringBuilder historial = new StringBuilder();
         boolean huyo = false;
 
@@ -39,12 +40,14 @@ public class Main {
                     i + 1, enemigo.getNombre(), enemigo.getNivel());
             historial.append(String.format("-- Combate %d contra %s --%n", i + 1, enemigo.getNombre()));
 
-            // Bucle principal: continúa mientras ambos sigan vivos (y el jugador no huya)
+            // Bucle principal: permanece mientras el Personaje Y el Enemigo tengan estaVivo en true
+            combate:
             do {
                 mostrarMenu();
                 int opcion = leerEntero(scanner);
                 boolean turnoConsumido = false;
 
+                // Validación de entrada errónea con if-else: el programa nunca se interrumpe
                 if (opcion < 1 || opcion > 5) {
                     System.out.printf("Opción inválida. Elige un número del 1 al 5.%n");
                 } else {
@@ -59,16 +62,18 @@ public class Main {
                             mostrarEstado(heroe, enemigo);
                             break;
                         case 4:
+                            // Huir: rompe la ejecución del combate terminando el bucle
                             huyo = true;
                             historial.append(String.format("%s huye del combate.%n", heroe.getNombre()));
-                            break;
+                            imprimirHistorial(historial, heroe);
+                            break combate;
                         case 5:
                             abrirTienda(scanner, heroe, historial);
                             break;
                     }
                 }
 
-                // Turno del enemigo, solo si el jugador gastó su turno y el enemigo sigue vivo
+                // Turno del enemigo: solo si el jugador gastó su turno y el enemigo sigue vivo
                 if (turnoConsumido && enemigo.isEstaVivo()) {
                     int vidaAntes = heroe.getPuntosVida();
                     enemigo.atacar(heroe);
@@ -79,13 +84,11 @@ public class Main {
                     }
                 }
 
-                // Al final de cada ronda se imprime el historial acumulado
+                // Al finalizar cada ronda se imprime el historial consolidado acumulado
                 if (turnoConsumido) {
-                    System.out.printf("%n--- HISTORIAL DE BATALLA ---%n%s", historial);
-                    System.out.printf("Vida: %d/%d | Oro: %.2f | Nivel: %d%n",
-                            heroe.getPuntosVida(), heroe.getVidaMaxima(), heroe.getOro(), heroe.getNivel());
+                    imprimirHistorial(historial, heroe);
                 }
-            } while (heroe.isEstaVivo() && enemigo.isEstaVivo() && !huyo);
+            } while (heroe.isEstaVivo() && enemigo.isEstaVivo());
         }
 
         // ---------- Resumen final ----------
@@ -168,14 +171,16 @@ public class Main {
             opcion = leerEntero(scanner);
 
             if (opcion == 1) {
+                // La compra llama obligatoriamente a setOro() con el nuevo saldo (oro - costo).
+                // Si el saldo caería por debajo de 0.0, el setter rechaza la operación y NO se entrega el ítem.
                 double nuevoSaldo = heroe.getOro() - COSTO_POCION_GRANDE;
                 if (heroe.setOro(nuevoSaldo)) {
                     heroe.agregarPocionGrande();
                     System.out.printf("Compra exitosa. Saldo restante: %.2f%n", heroe.getOro());
                     historial.append(String.format("%s compra una Poción Grande de Salud.%n", heroe.getNombre()));
                 } else {
-                    System.out.printf("Saldo insuficiente: necesitas %.2f y tienes %.2f.%n",
-                            COSTO_POCION_GRANDE, heroe.getOro());
+                    System.out.printf("Compra rechazada: la poción no se entrega. Oro disponible: %.2f%n",
+                            heroe.getOro());
                 }
             } else if (opcion != 2) {
                 System.out.printf("Opción inválida. Elige 1 o 2.%n");
@@ -203,9 +208,15 @@ public class Main {
         System.out.printf("Experiencia: %d/%d | Pociones: %d normales, %d grandes | Vivo: %b%n",
                 heroe.getExperiencia(), heroe.experienciaParaSiguienteNivel(),
                 heroe.getPocionesNormales(), heroe.getPocionesGrandes(), heroe.isEstaVivo());
-        System.out.printf("%s (Nivel %d) | Vida: %d/%d | Ataque: %d%n",
+        System.out.printf("%s (Nivel %d) | Vida: %d/%d | Ataque: %d | Vivo: %b%n",
                 enemigo.getNombre(), enemigo.getNivel(), enemigo.getPuntosVida(),
-                enemigo.getVidaMaxima(), enemigo.getPuntosAtaque());
+                enemigo.getVidaMaxima(), enemigo.getPuntosAtaque(), enemigo.isEstaVivo());
+    }
+
+    private static void imprimirHistorial(StringBuilder historial, Personaje heroe) {
+        System.out.printf("%n--- HISTORIAL DE BATALLA ---%n%s", historial);
+        System.out.printf("Vida: %d/%d | Oro: %.2f | Nivel: %d%n",
+                heroe.getPuntosVida(), heroe.getVidaMaxima(), heroe.getOro(), heroe.getNivel());
     }
 
     /** Lee una línea y la convierte a entero; si no es un número devuelve -1 (opción inválida). */
